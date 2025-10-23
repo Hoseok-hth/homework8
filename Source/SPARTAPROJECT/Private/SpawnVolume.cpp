@@ -38,8 +38,11 @@ FItemSpawnRow* ASpawnVolume::GetRandomItem() const
 	static const FString ContextString(TEXT("ItemSpawnContext"));
 	ItemDataTable->GetAllRows(ContextString, AllRows);
 
-	if (AllRows.IsEmpty()) return nullptr;
-
+	if (AllRows.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ItemSpawnContext is empty!"));
+		return nullptr;
+	}
 	// 2) 전체 확률 합 구하기
 	float TotalChance = 0.0f; // 초기화
 	for (const FItemSpawnRow* Row : AllRows) // AllRows 배열의 각 Row를 순회

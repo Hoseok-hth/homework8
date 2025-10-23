@@ -2,9 +2,11 @@
 
 
 #include "SpartaGameState.h"
+#include "SpartaGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "SpawnVolume.h"
 #include "CoinItem.h"
+
 
 ASpartaGameState::ASpartaGameState()
 {
@@ -26,6 +28,15 @@ void ASpartaGameState::BeginPlay()
 
 void ASpartaGameState::StartLevel()
 {
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
+		if (SpartaGameInstance)
+		{
+			CurrentLevelIndex = SpartaGameInstance->CurrentLevelIndex;
+		}
+	}
 	// 레벨 시작 시, 코인 개수 초기화
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
@@ -61,7 +72,7 @@ void ASpartaGameState::StartLevel()
 		LevelDuration,
 		false
 	);
-	
+	//UE_LOG(LogTemp, Warning, TEXT("%d"),SpawnVolume->);
 	UE_LOG(LogTemp, Warning, TEXT("Level %d Start!, Spawned %d coin"),
 		CurrentLevelIndex + 1,
 		SpawnedCoinCount);
@@ -73,6 +84,16 @@ void ASpartaGameState::EndLevel()
 	GetWorldTimerManager().ClearTimer(LevelTimerHandle);
 	// 다음 레벨 인덱스로
 	CurrentLevelIndex++;
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
+		if (SpartaGameInstance)
+		{
+			//AddScore(Score);
+			SpartaGameInstance->CurrentLevelIndex = CurrentLevelIndex;
+		}
+	}
 
 	// 모든 레벨을 다 돌았다면 게임 오버 처리
 	if (CurrentLevelIndex >= MaxLevels)
@@ -129,6 +150,14 @@ int32 ASpartaGameState::GetScore() const
 
 void ASpartaGameState::AddScore(int32 Amount)
 {
-	Score += Amount;
-	UE_LOG(LogTemp, Warning, TEXT("Score: %i"), Score);
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
+		if (SpartaGameInstance)
+		{
+			SpartaGameInstance->AddToScore(Amount);
+		}
+	}
+	
+	
 }
